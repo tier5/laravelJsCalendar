@@ -4,10 +4,16 @@
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left">
-            <a class="btn btn-primary" href="{{ route('calendars.create') }}"> Add Events</a>
+            <a class="btn btn-primary" data-toggle="modal" data-target="#createTaskModal"> Add Events</a>
         </div>
     </div>
 </div>
+@if ($message = Session::get('success'))
+    <div class="alert alert-success">
+        <p>{{ $message }}</p>
+    </div>
+@endif
+
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
@@ -15,20 +21,143 @@
         </div>
     </div>
 </div>
+
 <div id="fullCalModal" class="modal fade">
+
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                <h4 id="modalTitle" class="modal-title"></h4>
+                <h4 id="modalTitle" class="modal-title">Event</h4>
             </div>
-            <div id="modalBody" class="modal-body"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <a class="btn btn-primary" id="eventUrl" target="_blank">Event Page</a>
+
+            <div id="modalBody" class="modal-body">
+                <div class="card">
+                    <form action="{{route('post')}}" method="POST">
+                        {{ CSRF_FIELD()}}
+                    <div class="card-body">
+
+                @if (count($errors) > 0)
+                    <div class="alert alert-danger">
+                        <strong>Whoops!</strong> There were some problems with your input.<br><br>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                <div class="row">
+                    <input type="hidden" class="id" name="id">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="input-group">
+                            <input type="text" id="updatetaskName" name="updateTaskName" class="form-control disable" disabled="disabled">
+                            <span class="input-group-btn">
+                            <button class="btn btn-default editBtn"  type="button"><i class="fa fa-pencil"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="input-group">
+                            <input type="text" id="updateDescription" name="updateDescription" class="form-control disable" disabled="disabled" contenteditable="false">
+                            <span class="input-group-btn">
+                            <button class="btn btn-default editBtn"  type="button"><i class="fa fa-pencil"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="input-group">
+                            <input type="text" id="updateTaskDate" name="updateTaskDate" class="form-control disable" disabled="disabled" contenteditable="false">
+                            <span class="input-group-btn">
+                            <button class="btn btn-default editBtn"  type="button"><i class="fa fa-pencil"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                    </div>
+                <div align="left">
+                    <button class="btn btn-primary" id="updateBtn" disabled="disabled">Update</button>
+
+                </div>
+                </form>
+                    <div  align="right">
+                    <form action="{{route('delete')}}" method="POST">
+                        {{CSRF_FIELD()}}
+                        <input type="hidden" class="id" name="id">
+                        <button class="btn btn-primary">Delete</button>
+                    </form>
+                </div>
+                </div>
+
             </div>
+
+
+
         </div>
     </div>
+
+
+
+</div>
+{{--Modal For Creating New Task--}}
+<div id="createTaskModal" class="modal fade">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">close</span></button>
+                    <h4 id="modalTitle" class="modal-title">Event</h4>
+                </div>
+                <div id="modalBody" class="modal-body">
+
+                    <div class="card">
+                        <form action="{{route('store')}}" method="POST">
+                            {{ CSRF_FIELD()}}
+                        <div class="card-body">
+
+                    @if (count($errors) > 0)
+                        <div class="alert alert-danger">
+                            <strong>Whoops!</strong> There were some problems with your input.<br><br>
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <strong>Task Name:</strong>
+                                    <input type="text" id="taskName" name="taskName" class="form-control" placeholder="Task Name">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <strong>Task Description:</strong>
+                                    <input type="text" id="description" name="description" class="form-control" placeholder="Description">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                <div class="form-group">
+                                    <strong>Date:</strong>
+                                    <input type="text" id="taskDate" name="taskDate" class="form-control" placeholder="YYYY-MM-DD">
+                                </div>
+                            </div>
+
+                        </div>
+                        </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary">Submit</button>
+
+                    </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 </div>
 <script>
     $(document).ready(function() {
@@ -39,8 +168,10 @@
                 right: ''
             },
             eventClick:  function(event, jsEvent, view) {
-                $('#modalTitle').html(event.title);
-                $('#modalBody').html(event.description);
+                $('#updatetaskName').attr('value',event.title);
+                $('#updateDescription').attr('value',event.description);
+                $('#updateTaskDate').attr('value',event.date);
+                $('.id').attr('value',event.id);
                 $('#eventUrl').attr('href',event.url);
                 $('#fullCalModal').modal();
                 return false;
@@ -51,12 +182,34 @@
 
                     title : '{{ $cal->name}}',
                     description: '{{ $cal->description }}',
-                    start : '{{ $cal->task_date }}',
+
+                    date: '{{ $cal->task_date }}',
+                    id:     '{{ $cal->id }}',
                     url : '{{ route('calendars.create', $cal->id) }}'
                 },
                 @endforeach
+
             ],
         })
+    });
+    $('.editBtn').on('click', function(event) {
+        event.preventDefault();
+
+        if ($('.disable').attr('disabled')){
+            $('.disable').attr('contenteditable','true');
+            $('.disable').removeAttr('disabled');
+            $('#updateBtn').removeAttr('disabled');
+        }else{
+            $('.disable').attr('contenteditable','false');
+            $('.disable').attr('disabled', 'disabled');
+            $('#updateBtn').attr('disabled','disabled');
+        }
+    });
+</script>
+<script>
+    $('#taskDate').datepicker({
+        autoclose: true,
+        dateFormat: "yy-mm-dd"
     });
 </script>
 @endsection

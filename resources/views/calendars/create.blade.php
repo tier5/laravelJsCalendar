@@ -20,7 +20,7 @@
             </ul>
         </div>
     @endif
-    {!! Form::open(array('route' => 'calendars.store','method'=>'POST')) !!}
+    {!! Form::open(array('route' => 'store','method'=>'POST')) !!}
     @include('calendars.form')
     {!! Form::close() !!}
 

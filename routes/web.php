@@ -16,3 +16,7 @@ Route::get('/', function () {
 });
 
 Route::resource('calendars', 'CalendarController');
+Route::post('/calendarstore', 'CalendarController@store')->name("store");
+Route::post('/calendarupdate', 'CalendarController@update')->name("post");
+Route::post('/calendardelete', 'CalendarController@destroy')->name("delete");
+
