@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Request;
 //use Illuminate\Http\Request;
 use App\Http\Requests;
-
-
 use App\Calendar;
 class CalendarController extends Controller
 {
     public function index()
     {
         $calendar = Calendar::all();
-
-        return view('calendars.index', compact('calendar'));
+//        return response()->json([
+//            'event' => $calendar
+//        ]);
+   return view('calendars.index', compact('calendar'));
     }
 
     public function create()
@@ -21,12 +21,14 @@ class CalendarController extends Controller
         return view('calendars.create');
     }
 
-    public function store()
+    public function store(Request $request)
     {
+
         $request=Request::all();
-        Calendar::create(["name"=>$request["taskName"],"description"=>$request["description"],"task_date"=>$request["taskDate"]]);
-        return redirect()->route('calendars.index')
-                         ->with('success','Task Created Successfully');
+
+        Calendar::create(["name"=>$request["name"],"description"=>$request["des"],"task_date"=>$request["dt"]]);
+//        return redirect()->route('calendars.index')
+//                         ->with('success','Task Created Successfully');
     }
 
     public function update()

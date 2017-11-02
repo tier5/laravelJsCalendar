@@ -1,3 +1,18 @@
 .input-group{
     margin-bottom: 20px; !important;
 }
+.spanFormat {
+    text-align: left;
+    display: table-cell;
+    min-width: 10px;
+    padding-right: 10px;
+}
+#updateForm{
+    display: inline;
+}
+.log_inner{
+    margin-top: 10px;
+}
+#bootstrapModalFullCalendar{
+    margin-bottom:50px;
+}

@@ -8,11 +8,13 @@
         </div>
     </div>
 </div>
+<div class="log_inner text-center">
 @if ($message = Session::get('success'))
     <div class="alert alert-success">
         <p>{{ $message }}</p>
     </div>
 @endif
+</div>
 
 <div class="container">
     <div class="row">
@@ -33,7 +35,8 @@
 
             <div id="modalBody" class="modal-body">
                 <div class="card">
-                    <form action="{{route('post')}}" method="POST">
+                    <span class="spanFormat">
+                    <form action="{{route('post')}}" method="POST" id="updateForm">
                         {{ CSRF_FIELD()}}
                     <div class="card-body">
 
@@ -76,18 +79,20 @@
                 </div>
 
                     </div>
-                <div align="left">
-                    <button class="btn btn-primary" id="updateBtn" disabled="disabled">Update</button>
 
-                </div>
+                    <button class="btn btn-primary" id="updateBtn" disabled="disabled">Update</button>
                 </form>
-                    <div  align="right">
-                    <form action="{{route('delete')}}" method="POST">
+                        <div class="pull-right">
+                        <form action="{{route('delete')}}" method="POST">
                         {{CSRF_FIELD()}}
-                        <input type="hidden" class="id" name="id">
+                            <input type="hidden" class="id" name="id">
                         <button class="btn btn-primary">Delete</button>
                     </form>
-                </div>
+                            </div>
+                    </span>
+
+
+
                 </div>
 
             </div>
@@ -112,7 +117,7 @@
                 <div id="modalBody" class="modal-body">
 
                     <div class="card">
-                        <form action="{{route('store')}}" method="POST">
+                        <form id="frmAdd" action="{{route('store')}}" method="POST">
                             {{ CSRF_FIELD()}}
                         <div class="card-body">
 
@@ -149,7 +154,7 @@
                         </div>
                         </div>
                     <div class="card-footer">
-                        <button class="btn btn-primary">Submit</button>
+                        <button id="add-event" class="btn btn-primary">Submit</button>
 
                     </div>
                         </form>
@@ -162,20 +167,23 @@
 <script>
     $(document).ready(function() {
         $('#bootstrapModalFullCalendar').fullCalendar({
+
             header: {
                 left: '',
                 center: 'prev title next',
                 right: ''
             },
+
             eventClick:  function(event, jsEvent, view) {
                 $('#updatetaskName').attr('value',event.title);
                 $('#updateDescription').attr('value',event.description);
                 $('#updateTaskDate').attr('value',event.date);
                 $('.id').attr('value',event.id);
-                $('#eventUrl').attr('href',event.url);
+
                 $('#fullCalModal').modal();
                 return false;
             },
+
             events : [
                     @foreach($calendar as $cal)
                 {
@@ -185,12 +193,36 @@
 
                     date: '{{ $cal->task_date }}',
                     id:     '{{ $cal->id }}',
-                    url : '{{ route('calendars.create', $cal->id) }}'
+
                 },
                 @endforeach
 
             ],
-        })
+        });
+        $('#add-event').click(function(e) {
+            e. preventDefault();
+            //setting variables based on the input fields
+            var name = $('input[name="taskName"]').val();
+            var description = $('input[name="description"]').val();
+            var taskDate = $('input[name="taskDate"]').val();
+            //console.log(data);
+            $.ajax({
+                url: "{{route('store')}}",
+                type:"POST",
+                data : {name: name, des: description, dt: taskDate, _token: "{{Session::token()}}"},
+                success:function (data) {
+                    $('#bootstrapModalFullCalendar').fullCalendar({ events: "data"});
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'refetchEvents' );
+                    $('#frmAdd').trigger("reset");
+                    $('#createTaskModal').modal('hide')
+//
+                }
+
+            });
+        });
+
+
+
     });
     $('.editBtn').on('click', function(event) {
         event.preventDefault();
@@ -207,6 +239,9 @@
     });
 </script>
 <script>
+
+
+
     $('#taskDate').datepicker({
         autoclose: true,
         dateFormat: "yy-mm-dd"
