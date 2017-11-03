@@ -16,6 +16,17 @@ class CalendarController extends Controller
    return view('calendars.index', compact('calendar'));
     }
 
+    public function get()
+    {
+        $calendar = Calendar::all();
+
+        return $calendar;
+//        return response()->json([
+//            'event' => $calendar
+//        ]);
+
+    }
+
     public function create()
     {
         return view('calendars.create');
@@ -26,7 +37,9 @@ class CalendarController extends Controller
 
         $request=Request::all();
 
-        Calendar::create(["name"=>$request["name"],"description"=>$request["des"],"task_date"=>$request["dt"]]);
+        $calendar=Calendar::create(["name"=>$request["name"],"description"=>$request["des"],"task_date"=>$request["dt"]]);
+        $c=Calendar::all();
+        return $c;
 //        return redirect()->route('calendars.index')
 //                         ->with('success','Task Created Successfully');
     }
@@ -45,7 +58,9 @@ class CalendarController extends Controller
         $request=Request::all();
 //        dd(Request::all());
         Calendar::destroy($request['id']);
-        return redirect()->route('calendars.index')
-            ->with('success','Task Deleted Successfully');
+        $c=Calendar::all();
+        return $c;
+//        return redirect()->route('index')
+//            ->with('success','Task Deleted Successfully');
     }
 }

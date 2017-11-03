@@ -1,13 +1,6 @@
 @extends('layouts.default')
 @section('content')
-<h3>Manage Event</h3>
-<div class="row">
-    <div class="col-lg-12 margin-tb">
-        <div class="pull-left">
-            <a class="btn btn-primary" data-toggle="modal" data-target="#createTaskModal"> Add Events</a>
-        </div>
-    </div>
-</div>
+
 <div class="log_inner text-center">
 @if ($message = Session::get('success'))
     <div class="alert alert-success">
@@ -16,10 +9,19 @@
 @endif
 </div>
 
-<div class="container">
+<div class="container" id="boot_calender">
+    <h3>Manage Event</h3>
+    <div class="row">
+        <div class="col-lg-12 margin-tb">
+            <div class="pull-left">
+                <a class="btn btn-primary" data-toggle="modal" data-target="#createTaskModal"> Add Events</a>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-xs-12">
-            <div id="bootstrapModalFullCalendar"></div>
+            {{--<div class="bootstrapModalFullCalendar"></div>--}}
+            <div id="myCalender"></div>
         </div>
     </div>
 </div>
@@ -83,10 +85,10 @@
                     <button class="btn btn-primary" id="updateBtn" disabled="disabled">Update</button>
                 </form>
                         <div class="pull-right">
-                        <form action="{{route('delete')}}" method="POST">
+                        <form action="{{route('delete')}}" id="frmDelete" method="POST">
                         {{CSRF_FIELD()}}
                             <input type="hidden" class="id" name="id">
-                        <button class="btn btn-primary">Delete</button>
+                        <button class="btn btn-primary id" id="delete" value="id" name="id">Delete</button>
                     </form>
                             </div>
                     </span>
@@ -120,17 +122,6 @@
                         <form id="frmAdd" action="{{route('store')}}" method="POST">
                             {{ CSRF_FIELD()}}
                         <div class="card-body">
-
-                    @if (count($errors) > 0)
-                        <div class="alert alert-danger">
-                            <strong>Whoops!</strong> There were some problems with your input.<br><br>
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
@@ -165,8 +156,12 @@
 
 </div>
 <script>
+    var event_array=[];
     $(document).ready(function() {
-        $('#bootstrapModalFullCalendar').fullCalendar({
+
+        getData();
+
+        $('#myCalender').fullCalendar({
 
             header: {
                 left: '',
@@ -177,51 +172,66 @@
             eventClick:  function(event, jsEvent, view) {
                 $('#updatetaskName').attr('value',event.title);
                 $('#updateDescription').attr('value',event.description);
-                $('#updateTaskDate').attr('value',event.date);
+                $('#updateTaskDate').attr('value',event.start);
                 $('.id').attr('value',event.id);
 
                 $('#fullCalModal').modal();
                 return false;
             },
-
-            events : [
-                    @foreach($calendar as $cal)
-                {
-
-                    title : '{{ $cal->name}}',
-                    description: '{{ $cal->description }}',
-
-                    date: '{{ $cal->task_date }}',
-                    id:     '{{ $cal->id }}',
-
-                },
-                @endforeach
-
-            ],
+            eventSources:[
+                event_array
+            ]
         });
         $('#add-event').click(function(e) {
             e. preventDefault();
+            var i = true;
             //setting variables based on the input fields
             var name = $('input[name="taskName"]').val();
             var description = $('input[name="description"]').val();
             var taskDate = $('input[name="taskDate"]').val();
             //console.log(data);
-            $.ajax({
-                url: "{{route('store')}}",
-                type:"POST",
-                data : {name: name, des: description, dt: taskDate, _token: "{{Session::token()}}"},
-                success:function (data) {
-                    $('#bootstrapModalFullCalendar').fullCalendar({ events: "data"});
-                    $('#bootstrapModalFullCalendar').fullCalendar( 'refetchEvents' );
-                    $('#frmAdd').trigger("reset");
-                    $('#createTaskModal').modal('hide')
-//
-                }
 
+                $.ajax({
+                    url: "{{route('store')}}",
+                    type: "POST",
+                    data: {name: name, des: description, dt: taskDate, _token: "{{Session::token()}}"},
+
+                    success: function (data) {
+                        $('#frmAdd').trigger("reset");
+                        $('#createTaskModal').modal('hide');
+                        getData();
+                        $('#myCalender').fullCalendar('removeEvents');
+                        $('#myCalender').fullCalendar('addEventSource', event_array);
+                        $('#myCalender').fullCalendar('rerenderEvents' );
+                        toastr.success('Task Added Successfully', 'Success Alert', {timeOut: 5000});
+
+                    }
+                });
+        });
+        //delete product and remove it from list
+        $('#delete').click(function(e) {
+            e.preventDefault();
+            var eventID = $('.id').val();
+            $.ajax({
+
+                url: "{{route('delete')}}",
+                method: "POST",
+                data: {
+                    id: eventID,_token: "{{Session::token()}}"
+
+                },
+
+                success: function () {
+                    $('#frmDelete').trigger("reset");
+                    $('#fullCalModal').modal('hide');
+                    getData();
+                    $('#myCalender').fullCalendar('removeEvents');
+                    $('#myCalender').fullCalendar('addEventSource', event_array);
+                    $('#myCalender').fullCalendar('rerenderEvents' );
+                    toastr.success('Task Deleted Successfully', 'Success Alert', {timeOut: 5000});
+                }
             });
         });
-
-
 
     });
     $('.editBtn').on('click', function(event) {
@@ -237,6 +247,23 @@
             $('#updateBtn').attr('disabled','disabled');
         }
     });
+    function getData() {
+        $.ajax({
+            url: '{{route('getCal')}}',
+            type: 'GET',
+            async: false,
+            success: function (data) {
+                event_array = [];
+                for (i=0; i< data.length; i++) {
+                    event_array.push({title: data[i].name,description:data[i].description ,start: data[i].task_date,id:data[i].id});
+                }
+            },
+            error: function () {
+                toastr.error('There was an error while fetching events.', 'Request Failed', {timeOut: 5000});
+            }
+        });
+
+    }
 </script>
 <script>
 

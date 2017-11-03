@@ -15,6 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('get-calendars', 'CalendarController@get')->name("getCal");
 Route::get('calendars', 'CalendarController@index')->name("index");
 Route::post('/calendarstore', 'CalendarController@store')->name("store");
 Route::post('/calendarupdate', 'CalendarController@update')->name("post");
