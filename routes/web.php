@@ -17,7 +17,8 @@ Route::get('/', function () {
 
 Route::get('get-calendars', 'CalendarController@get')->name("getCal");
 Route::get('calendars', 'CalendarController@index')->name("index");
-Route::post('/calendarstore', 'CalendarController@store')->name("store");
-Route::post('/calendarupdate', 'CalendarController@update')->name("post");
+Route::post('/calendarstore,', 'CalendarController@store')->name("store");
+Route::post('/calendarupdate', 'CalendarController@update')->name("edit");
+Route::post('/calendardrop', 'CalendarController@drop')->name("drop");
 Route::post('/calendardelete', 'CalendarController@destroy')->name("delete");
 

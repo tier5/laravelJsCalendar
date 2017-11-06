@@ -46,13 +46,29 @@ class CalendarController extends Controller
 
     public function update()
     {
-//        dd(Request::all());
         $request=Request::all();
-        Calendar::find($request["id"])->update(["name"=>$request["updateTaskName"],"description"=>$request["updateDescription"],"task_date"=>$request["updateTaskDate"]]);
+// return $request;
+        $event =Calendar::find($request['id']);
+        $event->name = $request["name"];
+        $event->description = $request["des"];
+        $event->task_date = $request["dt"];
+        $event->save();
 
-        return redirect()-> route('calendars.index')
-                         ->with('success','Task Updated Successfully');
+        $c=Calendar::all();
+        return $c;
     }
+
+    public function drop(){
+        $request=Request::all();
+        $event =Calendar::find($request['id']);
+        $event->task_date = $request["dt"];
+        $event->save();
+
+        $c=Calendar::all();
+        return $c;
+
+    }
+
     public function destroy()
     {
         $request=Request::all();

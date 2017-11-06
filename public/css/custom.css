@@ -16,3 +16,12 @@
 #myCalender{
     margin-bottom:50px;
 }
+.fc-event{
+    cursor: pointer;
+}
+.fc-day{
+    cursor: pointer;
+}
+.fc-button:focus{
+    outline:none!important;
+}

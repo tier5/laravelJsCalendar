@@ -12,13 +12,6 @@
 <div class="container" id="boot_calender">
     <h3>Manage Event</h3>
     <div class="row">
-        <div class="col-lg-12 margin-tb">
-            <div class="pull-left">
-                <a class="btn btn-primary" data-toggle="modal" data-target="#createTaskModal"> Add Events</a>
-            </div>
-        </div>
-    </div>
-    <div class="row">
         <div class="col-xs-12">
             {{--<div class="bootstrapModalFullCalendar"></div>--}}
             <div id="myCalender"></div>
@@ -38,7 +31,7 @@
             <div id="modalBody" class="modal-body">
                 <div class="card">
                     <span class="spanFormat">
-                    <form action="{{route('post')}}" method="POST" id="updateForm">
+                    <form  id="updateForm">
                         {{ CSRF_FIELD()}}
                     <div class="card-body">
 
@@ -53,28 +46,28 @@
                     </div>
                 @endif
                 <div class="row">
-                    <input type="hidden" class="id" name="id">
+                    <input type="hidden" class="id" name="id" id="idupdate">
                     <div class="col-xs-12 col-sm-12 col-md-12">
                         <div class="input-group">
-                            <input type="text" id="updatetaskName" name="updateTaskName" class="form-control disable" disabled="disabled">
+                            <input type="text" id="updateTaskName" name="updateTaskName" class="form-control " disabled="disabled">
                             <span class="input-group-btn">
-                            <button class="btn btn-default editBtn"  type="button"><i class="fa fa-pencil"></i></button>
+                            <button class="btn btn-default" id="editBtnTask"  type="button"><i class="fa fa-pencil"></i></button>
                             </span>
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-12">
                         <div class="input-group">
-                            <input type="text" id="updateDescription" name="updateDescription" class="form-control disable" disabled="disabled" contenteditable="false">
+                            <input type="text" id="updateDescription" name="updateDescription" class="form-control " disabled="disabled" contenteditable="false">
                             <span class="input-group-btn">
-                            <button class="btn btn-default editBtn"  type="button"><i class="fa fa-pencil"></i></button>
+                            <button class="btn btn-default" id="editBtnDes"  type="button"><i class="fa fa-pencil"></i></button>
                             </span>
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-12">
                         <div class="input-group">
-                            <input type="text" id="updateTaskDate" name="updateTaskDate" class="form-control disable" disabled="disabled" contenteditable="false">
+                            <input type="text" id="updateTaskDate" name="updateTaskDate" class="form-control " disabled="disabled" contenteditable="false">
                             <span class="input-group-btn">
-                            <button class="btn btn-default editBtn"  type="button"><i class="fa fa-pencil"></i></button>
+                            <button class="btn btn-default" id="editBtnDate"  type="button"><i class="fa fa-pencil"></i></button>
                             </span>
                         </div>
                     </div>
@@ -85,7 +78,7 @@
                     <button class="btn btn-primary" id="updateBtn" disabled="disabled">Update</button>
                 </form>
                         <div class="pull-right">
-                        <form action="{{route('delete')}}" id="frmDelete" method="POST">
+                        <form id="frmDelete" method="POST">
                         {{CSRF_FIELD()}}
                             <input type="hidden" class="id" name="id">
                         <button class="btn btn-primary id" id="delete" value="id" name="id">Delete</button>
@@ -119,26 +112,26 @@
                 <div id="modalBody" class="modal-body">
 
                     <div class="card">
-                        <form id="frmAdd" action="{{route('store')}}" method="POST">
+                        <form id="frmAdd">
                             {{ CSRF_FIELD()}}
                         <div class="card-body">
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
-                                    <strong>Task Name:</strong>
-                                    <input type="text" id="taskName" name="taskName" class="form-control" placeholder="Task Name">
+                                    <strong>Task Name(4 characters minimum, only alphanumeric characters)</strong>
+                                    <input type="text" id="taskName" name="taskName" class="form-control" data-validation="length alphanumeric" data-validation-length="min4" placeholder="Task Name">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
-                                    <strong>Task Description:</strong>
-                                    <input type="text" id="description" name="description" class="form-control" placeholder="Description">
+                                    <strong>Task Description(only alphanumeric characters)</strong>
+                                    <input type="text" id="description" name="description" class="form-control" data-validation="length alphanumeric" data-validation-length="min4"  placeholder="Description">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
-                                    <strong>Date:</strong>
-                                    <input type="text" id="taskDate" name="taskDate" class="form-control" placeholder="YYYY-MM-DD">
+                                    <strong>Date</strong>
+                                    <input type="text" id="taskDate" name="taskDate" class="form-control" data-validation="date" data-validation-format="yyyy-mm-dd" placeholder="YYYY-MM-DD">
                                 </div>
                             </div>
 
@@ -162,18 +155,48 @@
         getData();
 
         $('#myCalender').fullCalendar({
-
             header: {
-                left: '',
-                center: 'prev title next',
-                right: ''
+                left: 'prev,next today',
+                center: ' title ',
+                right: 'month,agendaWeek,agendaDay,listWeek'
+            },
+            dayClick: function(date, jsEvent, view) {
+                $("#taskDate").val(moment(date).format('YYYY-MM-DD'));
+                $("#createTaskModal").modal("show");
+
             },
 
+                editable : true,
+//            theme: true,
+//            themeSystem:'jquery-ui',
+            eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view){
+                var dropedDate = event.start.format("YYYY-MM-DD");
+                var dropID = event.id;
+//                console.log(event.id);
+//                console.log(dropedDate);
+                //console.log(event);
+                $.ajax({
+                    url: "{{route('drop')}}",
+                    type: "POST",
+                    data: {
+                        dt:dropedDate,id: dropID,_token: "{{Session::token()}}",
+
+                    },
+                    success: function(data, textStatus) {
+                        toastr.success('Task Updated Successfully', 'Success Alert', {timeOut: 5000});
+                    },
+                    error: function() {
+                         toastr.error('There was an error while fetching events.', 'Request Failed', {timeOut: 5000});
+                    }
+                });
+                getData();
+            },
             eventClick:  function(event, jsEvent, view) {
-                $('#updatetaskName').attr('value',event.title);
+                $('#updateTaskName').attr('value',event.title);
                 $('#updateDescription').attr('value',event.description);
-                $('#updateTaskDate').attr('value',event.start);
+                $('#updateTaskDate').attr('value',event.date);
                 $('.id').attr('value',event.id);
+                $('#idupdate').attr('value',event.id);
 
                 $('#fullCalModal').modal();
                 return false;
@@ -181,10 +204,11 @@
             eventSources:[
                 event_array
             ]
+
         });
         $('#add-event').click(function(e) {
             e. preventDefault();
-            var i = true;
+//            var i = true;
             //setting variables based on the input fields
             var name = $('input[name="taskName"]').val();
             var description = $('input[name="description"]').val();
@@ -212,39 +236,106 @@
         $('#delete').click(function(e) {
             e.preventDefault();
             var eventID = $('.id').val();
+            swal({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+
+            }).then (function() {
+                    $.ajax({
+
+                        url: "{{route('delete')}}",
+                        type: "POST",
+                        data: {
+                            id: eventID, _token: "{{Session::token()}}"
+
+                        },
+                        success: function () {
+                            $('#frmDelete').trigger("reset");
+                            $('#fullCalModal').modal('hide');
+                            getData();
+                            $('#myCalender').fullCalendar('removeEvents');
+                            $('#myCalender').fullCalendar('addEventSource', event_array);
+                            $('#myCalender').fullCalendar('rerenderEvents');
+                            toastr.success('Task Deleted Successfully', 'Success Alert', {timeOut: 5000});
+                            console.log("success");
+                        }
+                    })
+            }).catch(swal.noop)
+        });
+        $('#updateBtn').click(function(e) {
+            e.preventDefault();
+            var eventID = $('.id').val();
+            //setting variables based on the input fields
+            var name = $('input[name="updateTaskName"]').val();
+            var description = $('input[name="updateDescription"]').val();
+            var taskDate = $('input[name="updateTaskDate"]').val();
             $.ajax({
 
-                url: "{{route('delete')}}",
-                method: "POST",
+                url: "{{route('edit')}}",
+                type: "POST",
                 data: {
-                    id: eventID,_token: "{{Session::token()}}"
+                    name: name, des: description, dt: taskDate,id: eventID,_token: "{{Session::token()}}"
 
                 },
-
-                success: function () {
+                success: function (data) {
                     $('#frmDelete').trigger("reset");
+                    $('#updateTaskName').attr('disabled',true);
+                    $('#updateDescription').attr('disabled',true);
+                    $('#updateTaskDate').attr('disabled',true);
                     $('#fullCalModal').modal('hide');
                     getData();
                     $('#myCalender').fullCalendar('removeEvents');
                     $('#myCalender').fullCalendar('addEventSource', event_array);
                     $('#myCalender').fullCalendar('rerenderEvents' );
-                    toastr.success('Task Deleted Successfully', 'Success Alert', {timeOut: 5000});
+                    toastr.success('Task Updated Successfully', 'Success Alert', {timeOut: 5000});
+
                 }
             });
         });
 
     });
-    $('.editBtn').on('click', function(event) {
+    $('#editBtnTask').on('click', function(event) {
         event.preventDefault();
 
-        if ($('.disable').attr('disabled')){
-            $('.disable').attr('contenteditable','true');
-            $('.disable').removeAttr('disabled');
+        if ($('#updateTaskName').attr('disabled')){
+            $('#updateTaskName').attr('contenteditable','true');
+            $('#updateTaskName').removeAttr('disabled');
             $('#updateBtn').removeAttr('disabled');
         }else{
-            $('.disable').attr('contenteditable','false');
-            $('.disable').attr('disabled', 'disabled');
-            $('#updateBtn').attr('disabled','disabled');
+            $('#updateTaskName').attr('contenteditable','false');
+            $('#updateTaskName').attr('disabled');
+            $('#updateBtn').attr('disabled');
+        }
+    });
+    $('#editBtnDes').on('click', function(event) {
+        event.preventDefault();
+
+        if ($('#updateDescription').attr('disabled')){
+            $('#updateDescription').attr('contenteditable','true');
+            $('#updateDescription').removeAttr('disabled');
+            $('#updateBtn').removeAttr('disabled');
+        }else{
+            $('#updateDescription').attr('contenteditable','false');
+            $('#updateDescription').attr('disabled');
+            $('#updateBtn').attr('disabled');
+        }
+    });
+    $('#editBtnDate').on('click', function(event) {
+        event.preventDefault();
+
+        if ($('#updateTaskDate').attr('disabled')){
+            $('#updateTaskDate').attr('contenteditable','true');
+            $('#updateTaskDate').removeAttr('disabled');
+            $('#updateBtn').removeAttr('disabled');
+        }else{
+            $('#updateTaskDate').attr('contenteditable','false');
+            $('#updateTaskDate').attr('disabled');
+            $('#updateBtn').attr('disabled');
         }
     });
     function getData() {
@@ -255,7 +346,7 @@
             success: function (data) {
                 event_array = [];
                 for (i=0; i< data.length; i++) {
-                    event_array.push({title: data[i].name,description:data[i].description ,start: data[i].task_date,id:data[i].id});
+                    event_array.push({id:data[i].id,title: data[i].name,description:data[i].description ,date: data[i].task_date});
                 }
             },
             error: function () {
@@ -265,13 +356,11 @@
 
     }
 </script>
-<script>
 
-
-
-    $('#taskDate').datepicker({
-        autoclose: true,
-        dateFormat: "yy-mm-dd"
+    <script>
+    $.validate({
+        lang: 'en'
     });
 </script>
+
 @endsection
