@@ -49,7 +49,7 @@
                     <input type="hidden" class="id" name="id" id="idupdate">
                     <div class="col-xs-12 col-sm-12 col-md-12">
                         <div class="input-group">
-                            <input type="text" id="updateTaskName" name="updateTaskName" class="form-control " disabled="disabled">
+                            <input type="text" id="updateTaskName" name="updateTaskName" class="form-control " disabled="disabled" required>
                             <span class="input-group-btn">
                             <button class="btn btn-default" id="editBtnTask"  type="button"><i class="fa fa-pencil"></i></button>
                             </span>
@@ -119,19 +119,19 @@
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
                                     <strong>Task Name(4 characters minimum, only alphanumeric characters)</strong>
-                                    <input type="text" id="taskName" name="taskName" class="form-control" data-validation="length alphanumeric" data-validation-length="min4" placeholder="Task Name">
+                                    <input type="text" id="taskName" name="taskName" class="form-control"  placeholder="Task Name">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
                                     <strong>Task Description(only alphanumeric characters)</strong>
-                                    <input type="text" id="description" name="description" class="form-control" data-validation="length alphanumeric" data-validation-length="min4"  placeholder="Description">
+                                    <input type="text" id="description" name="description" class="form-control" placeholder="Description">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group">
                                     <strong>Date</strong>
-                                    <input type="text" id="taskDate" name="taskDate" class="form-control" data-validation="date" data-validation-format="yyyy-mm-dd" placeholder="YYYY-MM-DD">
+                                    <input type="text" id="taskDate" name="taskDate" class="form-control" placeholder="YYYY-MM-DD">
                                 </div>
                             </div>
 
@@ -151,6 +151,34 @@
 <script>
     var event_array=[];
     $(document).ready(function() {
+        $("#frmAdd").validate({
+            rules: {
+                taskName: {
+                    required: true,
+                    pattern:'^[a-zA-Z\s-]+$'
+                },
+                description: {
+                    required: true,
+                    pattern:'^[a-zA-Z\s-]+$'
+                },
+                taskDate: {
+                    required: true,
+                    pattern:'^\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])$'
+                },
+            },
+            messages: {
+                taskName: {
+                    pattern: "Only alphabets,spaces and hyphens are allowed",
+                },
+                description: {
+                    pattern: "Only alphabets,spaces and hyphens are allowed",
+                },
+                taskDate:{
+                    pattern: "Maintain yyyy-mm-dd format",
+                }
+            }
+        });
+
 
         getData();
 
@@ -206,18 +234,20 @@
             ]
 
         });
-        $('#add-event').click(function(e) {
+        $('#frmAdd').submit(function(e) {
             e. preventDefault();
 //            var i = true;
             //setting variables based on the input fields
-            var name = $('input[name="taskName"]').val();
-            var description = $('input[name="description"]').val();
-            var taskDate = $('input[name="taskDate"]').val();
-            //console.log(data);
-
+            var IsValid=$('#frmAdd').valid();
+            if(IsValid) {
+                //console.log(data);
+                var name = $('input[name="taskName"]').val();
+                var description = $('input[name="description"]').val();
+                var taskDate = $('input[name="taskDate"]').val();
                 $.ajax({
                     url: "{{route('store')}}",
                     type: "POST",
+
                     data: {name: name, des: description, dt: taskDate, _token: "{{Session::token()}}"},
 
                     success: function (data) {
@@ -226,11 +256,14 @@
                         getData();
                         $('#myCalender').fullCalendar('removeEvents');
                         $('#myCalender').fullCalendar('addEventSource', event_array);
-                        $('#myCalender').fullCalendar('rerenderEvents' );
+                        $('#myCalender').fullCalendar('rerenderEvents');
                         toastr.success('Task Added Successfully', 'Success Alert', {timeOut: 5000});
 
                     }
                 });
+
+            }
+
         });
         //delete product and remove it from list
         $('#delete').click(function(e) {
@@ -262,7 +295,6 @@
                             $('#myCalender').fullCalendar('addEventSource', event_array);
                             $('#myCalender').fullCalendar('rerenderEvents');
                             toastr.success('Task Deleted Successfully', 'Success Alert', {timeOut: 5000});
-                            console.log("success");
                         }
                     })
             }).catch(swal.noop)
@@ -357,10 +389,5 @@
     }
 </script>
 
-    <script>
-    $.validate({
-        lang: 'en'
-    });
-</script>
 
 @endsection
